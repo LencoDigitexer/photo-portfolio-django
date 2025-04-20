@@ -20,10 +20,15 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+
+# ВСЕ URL которые есть в КОРНЕ проекта
+# Например, если нужно будет создать страницу для авторизации пользователя, то нужно будет создать приложение для авторизации, и затем создать URL для авторизации в этом приложении
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('photos.urls')),
 ]
 
 
+# Добавление медиа файлов в URL
+# находится в файле settings.py в переменной MEDIA_URL и MEDIA_ROOT
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

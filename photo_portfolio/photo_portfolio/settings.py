@@ -25,11 +25,15 @@ SECRET_KEY = 'django-insecure-m(4bs8+r6pw_(d@f@k*gl*m#i-1f6&_!4v!bi98972jxrzne1+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+
+# ВОТ ЗДЕСЬ ПРОПИСЫВАЕМ ДОМЕН БУДУЩЕГО САЙТА
 ALLOWED_HOSTS = []
 
 
 # Application definition
 
+
+# СОЗДАЮ ПРИЛОЖЕНИЕ С ФОТОГРАФИЯМИ + ФРЕЙМВОРК api для удобной работы с кодом
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -124,5 +128,17 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+
+# создаем папку где будут храниться фотки
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Настройте CORS для разрешения CORS-запросов к вашему API
+INSTALLED_APPS += ['corsheaders']
+# Добавьте CORS-заголовки в список промежуточных слоев для обработки CORS-запросов
+MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware'] + MIDDLEWARE
+
+# Разрешить все домены (для разработки)
+CORS_ALLOW_ALL_ORIGINS = True  
+# или для продакшена:
+# CORS_ALLOWED_ORIGINS = ["http://localhost:3000"] # Замените на ваш домен приложения
