@@ -16,4 +16,4 @@ class PhotoSerializer(serializers.ModelSerializer):
 
     # мы должны создать функцию для подсчета лайков, потому что мы не можем использовать поле в модели (не так просто) 
     def get_likes_count(self, obj):
-        return obj.likes_count
+        return obj.likes.count()

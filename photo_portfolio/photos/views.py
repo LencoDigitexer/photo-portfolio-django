@@ -26,15 +26,20 @@ class PhotoViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def like(self, request, pk=None):
         photo = self.get_object()
-        ip = request.META.get('REMOTE_ADDR')  # Получаем IP-адрес пользователя
+        ip = request.META.get('REMOTE_ADDR')
 
+        # Проверяем, существует ли лайк
         try:
-            Like.objects.create(photo=photo, ip_address=ip)
-        except IntegrityError:  # Если такой IP уже лайкнул это фото
-            return Response(
-                {"error": "Вы уже поставили лайк"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            like = Like.objects.get(photo=photo, ip_address=ip)
+            like.delete()  # Удаляем лайк, если он уже есть
+            message = "Лайк удален"
+        except Like.DoesNotExist:
+            Like.objects.create(photo=photo, ip_address=ip)  # Создаем новый лайк
+            message = "Лайк добавлен"
 
+        # Возвращаем обновленные данные
         serializer = self.get_serializer(photo)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({
+            "status": message,
+            "photo": serializer.data
+        }, status=status.HTTP_200_OK)
