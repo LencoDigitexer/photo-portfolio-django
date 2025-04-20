@@ -7,6 +7,13 @@ from .models import Photo
 
 # тут можно создать любые дополнительные поля, которые будут отображаться в браузере
 class PhotoSerializer(serializers.ModelSerializer):
+
+    # поле для подсчета лайков 
+    likes_count = serializers.SerializerMethodField()
     class Meta:
         model = Photo
         fields = ['id', 'image', 'description', 'created_at', 'user_id', 'category_id', 'likes_count']
+
+    # мы должны создать функцию для подсчета лайков, потому что мы не можем использовать поле в модели (не так просто) 
+    def get_likes_count(self, obj):
+        return obj.likes_count
