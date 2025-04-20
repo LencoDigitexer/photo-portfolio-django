@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from .models import Photo
 from .serializers import PhotoSerializer
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 # это класс вьюсета, он принимает на вход класс сериализатора и класс модели, и на выходе дает нам все объекты модели и возможность их изменять через api
@@ -11,3 +12,8 @@ class PhotoViewSet(viewsets.ModelViewSet):
     queryset = Photo.objects.all().order_by('-created_at')
     # класс сериализатора для работы с данными модели 
     serializer_class = PhotoSerializer
+
+    # Добавляем поддержку фильтрации
+    filter_backends = [DjangoFilterBackend]  
+    # Разрешаем фильтрацию по полю id
+    filterset_fields = ['id', 'category_id', 'user_id']  

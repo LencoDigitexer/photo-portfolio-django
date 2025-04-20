@@ -142,3 +142,13 @@ MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware'] + MIDDLEWARE
 CORS_ALLOW_ALL_ORIGINS = True  
 # или для продакшена:
 # CORS_ALLOWED_ORIGINS = ["http://localhost:3000"] # Замените на ваш домен приложения
+
+
+
+# Настройте Django REST framework для использования Django Filters
+# Он позволяет применять фильтры к вашему API для поиска и сортировки данных
+INSTALLED_APPS += ['django_filters']
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+}
