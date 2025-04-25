@@ -36,15 +36,17 @@ class Photo(models.Model):
 
 
 
-    # имя фото будет равно имени, которое задано при создании объекта
-    def __str__(self):
-        return f"Photo {self.id}"
+    
     
 
     # количество лайков
     @property
     def likes_count(self):
-        return self.likes.count()
+        return self.likes.all().count()
+    
+    # имя фото будет равно имени, которое задано при создании объекта
+    def __str__(self):
+        return f"Photo {self.id}"
     
 # Модель лайка для фотографии 
 class Like(models.Model):

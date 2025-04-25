@@ -13,6 +13,7 @@ from django_filters.rest_framework import DjangoFilterBackend       # импор
 from django.db import IntegrityError                                # импортируем класс для работы с исключениями
 from rest_framework.permissions import BasePermission               # импортируем класс базового разрешения для работы с вьюсетом
 from rest_framework.permissions import IsAuthenticated              # импортируем класс разрешений для работы с вьюсетом
+from rest_framework.permissions import AllowAny                     # импортируем класс разрешений для работы с вьюсетом
 
 
 class UserProfileView(APIView):
@@ -52,7 +53,13 @@ class PhotoViewSet(viewsets.ModelViewSet):
     serializer_class = PhotoSerializer
 
     # Делаем так, чтобы только пользователи с правами фотографа или художника могли создавать фотографии
-    permission_classes = [ReadOnlyOrIsAuthenticatedAndInGroup]
+    permission_classes = [ReadOnlyOrIsAuthenticatedAndInGroup]  # Основное разрешение для CRUD
+
+    @action(detail=True, methods=['post'])
+    def like(self, request, pk=None):
+        # Разрешаем анонимные запросы для метода like
+        self.permission_classes = [AllowAny]
+        return super().like(request, pk)
 
     def perform_create(self, serializer):
         """
@@ -67,21 +74,24 @@ class PhotoViewSet(viewsets.ModelViewSet):
 
 
     # Метод для добавления лайка к фотографии
-    @action(detail=True, methods=['post'])
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=[AllowAny],  # !!! Важно указать здесь
+        authentication_classes=[]        # Отключаем аутентификацию
+    )
     def like(self, request, pk=None):
         photo = self.get_object()
         ip = request.META.get('REMOTE_ADDR')
 
-        # Проверяем, существует ли лайк
         try:
             like = Like.objects.get(photo=photo, ip_address=ip)
-            like.delete()  # Удаляем лайк, если он уже есть
+            like.delete()
             message = "Лайк удален"
         except Like.DoesNotExist:
-            Like.objects.create(photo=photo, ip_address=ip)  # Создаем новый лайк
+            Like.objects.create(photo=photo, ip_address=ip)
             message = "Лайк добавлен"
 
-        # Возвращаем обновленные данные
         serializer = self.get_serializer(photo)
         return Response({
             "status": message,
