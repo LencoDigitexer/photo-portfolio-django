@@ -4,6 +4,7 @@ from rest_framework.response import Response                        # импор
 from rest_framework import viewsets, status                         # импортируем класс для работы с вьюсетами и статусами ответов
 from rest_framework.views import APIView                            # импортируем класс для работы с вью в формате json     
 from rest_framework.parsers import MultiPartParser, FormParser      # импортируем классы для работы с файлами и формами
+from rest_framework.generics import RetrieveAPIView
 from .models import Photo, Like                                     # импортируем модели из приложения
 from .models import UserProfile                                     # импортируем класс модели пользователя  
 from .serializers import UserProfileSerializer                      # импортируем класс сериализатора для работы с данными модели
@@ -14,12 +15,14 @@ from django.db import IntegrityError                                # импор
 from rest_framework.permissions import BasePermission               # импортируем класс базового разрешения для работы с вьюсетом
 from rest_framework.permissions import IsAuthenticated              # импортируем класс разрешений для работы с вьюсетом
 from rest_framework.permissions import AllowAny                     # импортируем класс разрешений для работы с вьюсетом
+from django.shortcuts import get_object_or_404
 
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
+    
     def get(self, request):
         profile = request.user.profile
         serializer = UserProfileSerializer(profile)
@@ -32,6 +35,22 @@ class UserProfileView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
+
+class UserProfileView(RetrieveAPIView):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [AllowAny]
+    lookup_field = 'user__id'  # Ищем по user_id
+
+    def get_object(self):
+        user_id = self.kwargs['user_id']
+        user_profile = get_object_or_404(UserProfile, user__id=user_id)
+        return user_profile
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request  # Для правильного формирования URL аватара
+        return context
 
 class IsPhotographerOrArtist(BasePermission):
     """

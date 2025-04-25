@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import PhotoViewSet
 from .views import  UserProfileView  # добавляем маршрут для получения профиля пользователя
 
+
 router = DefaultRouter()
 
 # это нужно для создания CRUD операций над фото
@@ -15,5 +16,9 @@ urlpatterns = [
 ]
 
 urlpatterns += [
-    path('api/profile/', UserProfileView.as_view(), name='user_profile'),
+    path('profile/', UserProfileView.as_view(), name='user_profile'),
+]
+
+urlpatterns += [
+    path('user/<int:user_id>/', UserProfileView.as_view(), name='user-profile'),
 ]

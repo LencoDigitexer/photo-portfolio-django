@@ -4,9 +4,19 @@ from .models import UserProfile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username')
+    first_name = serializers.CharField(source='user.first_name')
+    last_name = serializers.CharField(source='user.last_name')
+    avatar = serializers.SerializerMethodField()
+
     class Meta:
         model = UserProfile
-        fields = ['avatar']
+        fields = ['username', 'first_name', 'last_name', 'avatar']
+
+    def get_avatar(self, obj):
+        if obj.avatar:
+            return self.context['request'].build_absolute_uri(obj.avatar.url)
+        return None
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
