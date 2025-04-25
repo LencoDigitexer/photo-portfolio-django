@@ -13,6 +13,7 @@ class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photo
         fields = ['id', 'image', 'description', 'created_at', 'user_id', 'category_id', 'likes_count']
+        read_only_fields = ['user']
 
     # мы должны создать функцию для подсчета лайков, потому что мы не можем использовать поле в модели (не так просто) 
     def get_likes_count(self, obj):

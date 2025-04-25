@@ -152,3 +152,16 @@ INSTALLED_APPS += ['django_filters']
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
+
+
+# Установите настройки JWT для Django REST framework
+# Они позволяют использовать JWT-токены для аутентификации пользователей в вашем API
+INSTALLED_APPS += [
+    'rest_framework_simplejwt',
+]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}

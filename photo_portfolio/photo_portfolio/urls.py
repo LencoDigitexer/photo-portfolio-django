@@ -20,12 +20,23 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 # ВСЕ URL которые есть в КОРНЕ проекта
 # Например, если нужно будет создать страницу для авторизации пользователя, то нужно будет создать приложение для авторизации, и затем создать URL для авторизации в этом приложении
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('photos.urls')),
+
+    # Добавление URL для авторизации пользователя
+    # Для авторизации пользователя будет использоваться JWT токен
+    # JWT это тип токена, который будет использоваться для авторизации пользователя
+    # JWT (JSON Web Token) — это открытый стандартизированный способ безопасной передачи информации между двумя сторонами в виде токена.
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # создание JWT токена
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # обновление JWT токена
 ]
 
 

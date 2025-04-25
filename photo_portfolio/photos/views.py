@@ -4,8 +4,21 @@ from rest_framework.response import Response
 from rest_framework import viewsets, status
 from .models import Photo, Like
 from .serializers import PhotoSerializer
+from .permissions import ReadOnlyOrIsAuthenticatedAndInGroup
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import IntegrityError
+from rest_framework.permissions import BasePermission
+from rest_framework.permissions import IsAuthenticated
+
+class IsPhotographerOrArtist(BasePermission):
+    """
+    Разрешение: только пользователи из групп Photographer или Artist могут создавать фото.
+    """
+    def has_permission(self, request, view):
+        return (
+            request.user.groups.filter(name='Photographer').exists() or
+            request.user.groups.filter(name='Artist').exists()
+        )
 
 
 # это класс вьюсета, он принимает на вход класс сериализатора и класс модели, и на выходе дает нам все объекты модели и возможность их изменять через api
@@ -15,6 +28,15 @@ class PhotoViewSet(viewsets.ModelViewSet):
     queryset = Photo.objects.all().order_by('-created_at')
     # класс сериализатора для работы с данными модели 
     serializer_class = PhotoSerializer
+
+    # Делаем так, чтобы только пользователи с правами фотографа или художника могли создавать фотографии
+    permission_classes = [ReadOnlyOrIsAuthenticatedAndInGroup]
+
+    def perform_create(self, serializer):
+        """
+        Автоматически привязываем фото к текущему пользователю.
+        """
+        serializer.save(user=self.request.user)
 
     # Добавляем поддержку фильтрации
     filter_backends = [DjangoFilterBackend]  

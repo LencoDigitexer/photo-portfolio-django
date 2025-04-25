@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 
 
 class Photo(models.Model):
@@ -10,10 +10,22 @@ class Photo(models.Model):
     # время создания фото
     created_at = models.DateTimeField(auto_now_add=True)
     # кто создал фото
-    user_id = models.IntegerField(default=0)
+    # для того чтобы можно было обращаться к пользователю через фото, нужно использовать ForeignKey 
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     # категория фото
     category_id = models.IntegerField(default=0)
     
+    # перед сохранением модели, определяем категорию на основе группы пользователя
+    #метод будет вызываться каждый раз, когда мы сохраняем модель
+    # так как при сохранении модели мы не можем обращаться к группам пользователя, мы будем использовать метод save
+    # и передавать ему аргументы *args и **kwargs
+    def save(self, *args, **kwargs):
+        # Определяем категорию на основе группы пользователя
+        if self.user.groups.filter(name='Photographer').exists():
+            self.category_id = 0
+        elif self.user.groups.filter(name='Artist').exists():
+            self.category_id = 1
+        super().save(*args, **kwargs)
 
 
 
