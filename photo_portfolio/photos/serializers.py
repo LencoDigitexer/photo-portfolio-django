@@ -1,5 +1,32 @@
 from rest_framework import serializers
 from .models import Photo
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Кастомный сериализатор для добавления имени и фамилии в JWT-ответ.
+    """
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Добавляем дополнительные поля в токен
+        token['username'] = user.username
+        token['first_name'] = user.first_name
+        token['last_name'] = user.last_name
+
+        return token
+
+    def validate(self, attrs):
+        # Получаем стандартные данные токена
+        data = super().validate(attrs)
+
+        # Добавляем имя и фамилию в ответ
+        data['username'] = self.user.username
+        data['first_name'] = self.user.first_name
+        data['last_name'] = self.user.last_name
+
+        return data
 
 
 # это нужно для сериализации данных из бд и их отображения в виде json
