@@ -1,6 +1,12 @@
 from rest_framework import serializers
 from .models import Photo
+from .models import UserProfile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['avatar']
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
@@ -10,10 +16,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
 
+        # Безопасное получение профиля
+        profile = getattr(user, 'profile', None)
+        avatar_url = profile.avatar.url if profile and profile.avatar else None
+
         # Добавляем дополнительные поля в токен
         token['username'] = user.username
         token['first_name'] = user.first_name
         token['last_name'] = user.last_name
+        token['avatar'] = avatar_url
 
         return token
 
@@ -21,10 +32,14 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Получаем стандартные данные токена
         data = super().validate(attrs)
 
+        profile = getattr(self.user, 'profile', None)
+        avatar_url = profile.avatar.url if profile and profile.avatar else None
+
         # Добавляем имя и фамилию в ответ
         data['username'] = self.user.username
         data['first_name'] = self.user.first_name
         data['last_name'] = self.user.last_name
+        data['avatar'] = avatar_url
 
         return data
 
