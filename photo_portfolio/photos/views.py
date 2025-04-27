@@ -75,6 +75,20 @@ class PhotoViewSet(viewsets.ModelViewSet):
     # Делаем так, чтобы только пользователи с правами фотографа или художника могли создавать фотографии
     permission_classes = [ReadOnlyOrIsAuthenticatedAndInGroup]  # Основное разрешение для CRUD
 
+    # Чтобы добавить лимит без изменения структуры ответа, просто фильтруйте queryset
+    # т.е. можно посмотреть все фото, но если добавить к запросу ?limit=10, то будет показано только 10 последних фото
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        limit = self.request.query_params.get('limit')
+        if limit:
+            try:
+                limit = int(limit)
+                queryset = queryset[:limit]  # Просто ограничиваем queryset
+            except ValueError:
+                pass  # Игнорируем невалидные значения
+        return queryset
+
+    
     def get_permissions(self):
         """
         Переопределяем разрешения для метода DELETE.
