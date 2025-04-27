@@ -35,6 +35,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['first_name'] = user.first_name
         token['last_name'] = user.last_name
         token['avatar'] = avatar_url
+        token['id'] = user.id
 
         return token
 
@@ -50,6 +51,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data['first_name'] = self.user.first_name
         data['last_name'] = self.user.last_name
         data['avatar'] = avatar_url
+        data['id'] = self.user.id
 
         return data
 
