@@ -64,11 +64,22 @@ class PhotoSerializer(serializers.ModelSerializer):
 
     # поле для подсчета лайков 
     likes_count = serializers.SerializerMethodField()
+
+    # поле для проверки, лайкнул ли пользователь эту фотографию
+    is_liked_by_ip = serializers.SerializerMethodField()
+
     class Meta:
         model = Photo
-        fields = ['id', 'image', 'description', 'created_at', 'user_id', 'category_id', 'likes_count']
+        fields = ['id', 'image', 'description', 'created_at', 'user_id', 'category_id', 'likes_count', 'is_liked_by_ip']
         read_only_fields = ['user']
 
     # мы должны создать функцию для подсчета лайков, потому что мы не можем использовать поле в модели (не так просто) 
     def get_likes_count(self, obj):
         return obj.likes.count()
+
+    def get_is_liked_by_ip(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return False
+        ip = request.META.get('REMOTE_ADDR')
+        return obj.likes.filter(ip_address=ip).exists()

@@ -113,7 +113,9 @@ class IsPhotographerOrArtist(BasePermission):
 
 # это класс вьюсета, он принимает на вход класс сериализатора и класс модели, и на выходе дает нам все объекты модели и возможность их изменять через api
 # т.е. мы можем посмотреть все картинки и их свойства, добавить новую картинку, удалить картинку, изменить картинку
+
 class PhotoViewSet(viewsets.ModelViewSet):
+
     # queryset это все объекты модели сортированные по дате создания по убыванию 
     queryset = Photo.objects.all().order_by('-created_at')
     # класс сериализатора для работы с данными модели 
@@ -187,11 +189,15 @@ class PhotoViewSet(viewsets.ModelViewSet):
         photo = self.get_object()
         ip = request.META.get('REMOTE_ADDR')
 
-        try:
-            like = Like.objects.get(photo=photo, ip_address=ip)
-            like.delete()
+        # Проверяем, уже есть ли лайк от этого IP
+        like_exists = photo.likes.filter(ip_address=ip).exists()
+
+        if like_exists:
+            # Удаляем лайк
+            Like.objects.filter(photo=photo, ip_address=ip).delete()
             message = "Лайк удален"
-        except Like.DoesNotExist:
+        else:
+            # Добавляем лайк
             Like.objects.create(photo=photo, ip_address=ip)
             message = "Лайк добавлен"
 
