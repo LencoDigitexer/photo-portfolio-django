@@ -16,8 +16,43 @@ from django.db import IntegrityError                                # импор
 from rest_framework.permissions import BasePermission               # импортируем класс базового разрешения для работы с вьюсетом
 from rest_framework.permissions import IsAuthenticated              # импортируем класс разрешений для работы с вьюсетом
 from rest_framework.permissions import AllowAny                     # импортируем класс разрешений для работы с вьюсетом
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404                      # импортируем функцию для работы с исключениями
+from django.db.models import Count, Sum                             # импортируем классы для работы с базой данных 
 
+
+class StatisticsView(APIView):
+    """
+    Возвращает:
+    1. Количество фотографий user1
+    2. Количество фотографий user2
+    3. Общее количество лайков
+    """
+    
+    def get(self, request):
+        # Замените на реальные username или ID пользователей
+        user1_username = 'user1'
+        user2_username = 'user2'
+
+        try:
+            # Получаем количество фото для user1
+            user1_photos = Photo.objects.filter(user__username=user1_username).count()
+
+            # Получаем количество фото для user2
+            user2_photos = Photo.objects.filter(user__username=user2_username).count()
+
+            # Общее количество лайков
+            total_likes = Like.objects.count()  # Если лайки хранятся в модели Like
+            # Или через аннотацию, если лайки в Photo:
+            # total_likes = Photo.objects.aggregate(total_likes=Sum('likes_count')).get('total_likes', 0) or 0
+
+            return Response({
+                "user1_photos": user1_photos,
+                "user2_photos": user2_photos,
+                "total_likes": total_likes
+            }, status=200)
+        
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
