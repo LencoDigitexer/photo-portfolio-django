@@ -10,6 +10,7 @@ from .models import UserProfile                                     # импор
 from .serializers import UserProfileSerializer                      # импортируем класс сериализатора для работы с данными модели
 from .serializers import PhotoSerializer                            # импортируем класс сериализатора для работы с данными модели
 from .permissions import ReadOnlyOrIsAuthenticatedAndInGroup        # импортируем класс разрешений для работы с вьюсетом
+from .permissions import IsOwner                                    # импортируем класс разрешений для работы с вьюсетом 
 from django_filters.rest_framework import DjangoFilterBackend       # импортируем класс для работы с фильтрацией
 from django.db import IntegrityError                                # импортируем класс для работы с исключениями
 from rest_framework.permissions import BasePermission               # импортируем класс базового разрешения для работы с вьюсетом
@@ -73,6 +74,28 @@ class PhotoViewSet(viewsets.ModelViewSet):
 
     # Делаем так, чтобы только пользователи с правами фотографа или художника могли создавать фотографии
     permission_classes = [ReadOnlyOrIsAuthenticatedAndInGroup]  # Основное разрешение для CRUD
+
+    def get_permissions(self):
+        """
+        Переопределяем разрешения для метода DELETE.
+        """
+        if self.action == 'destroy':
+            return [IsAuthenticated(), IsOwner()]  # Только владелец может удалять
+        return super().get_permissions()
+    
+    def destroy(self, request, *args, **kwargs):
+        photo = self.get_object()
+        if photo.user != request.user:
+            return Response(
+                {"error": "Вы не можете удалить чужую фотографию."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        photo.delete()
+        return Response(
+            {"status": "Успех", "message": f"Фотография удалена."},
+            status=status.HTTP_200_OK  # Явный ответ об успехе
+        )
 
     @action(detail=True, methods=['post'])
     def like(self, request, pk=None):

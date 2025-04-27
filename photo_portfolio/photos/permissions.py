@@ -1,5 +1,15 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 
+
+class IsOwner(BasePermission):
+    """
+    Разрешение: только владелец фотографии может её удалять.
+    """
+    message = "Вы не являетесь владельцем этой фотографии."
+
+    def has_object_permission(self, request, view, obj):
+        return obj.user == request.user
+
 class ReadOnlyOrIsAuthenticatedAndInGroup(BasePermission):
     """
     Разрешение:
