@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import PhotoViewSet
 from .views import  UserProfileView  # добавляем маршрут для получения профиля пользователя
 from .views import StatisticsView    # добавляем маршрут для получения статистики
+from .views import IPView
 
 
 router = DefaultRouter()
@@ -29,4 +30,9 @@ urlpatterns += [
 # маршрут для получения статистики
 urlpatterns += [
     path('statistics/', StatisticsView.as_view(), name='statistics'),
+]
+
+# маршрут для получения IP адреса пользователя
+urlpatterns += [
+    path('ip/', IPView.as_view(), name='get-ip'),
 ]

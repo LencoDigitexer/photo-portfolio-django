@@ -18,7 +18,19 @@ from rest_framework.permissions import IsAuthenticated              # импор
 from rest_framework.permissions import AllowAny                     # импортируем класс разрешений для работы с вьюсетом
 from django.shortcuts import get_object_or_404                      # импортируем функцию для работы с исключениями
 from django.db.models import Count, Sum                             # импортируем классы для работы с базой данных 
+from django.http import HttpRequest
 
+
+
+class IPView(APIView):
+    def get(self, request: HttpRequest):
+        # Получаем IP-адрес
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return Response({'ip': ip}, status=200)
 
 class StatisticsView(APIView):
     """
